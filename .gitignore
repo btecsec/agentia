@@ -1,0 +1,63 @@
+# GitHub ne suit que les dossiers chapitre-* et les fichiers racine
+# dont ils ont besoin pour tourner. Le reste (livre/, docs/, notes)
+# reste sur le disque, hors du dépôt.
+/*
+!/chapitre-*/
+!/.gitignore
+!/.gitattributes
+!/.env.example
+!/requirements.txt
+!/README.md
+!/verifier.py
+!/pytest.ini
+
+# Environnements virtuels
+.venv/
+.venv-crewai/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Secrets : jamais versionnés. Seul .env.example l'est.
+.env
+.env.local
+
+# Caches d'outils
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Artefacts produits par les agents du livre
+*.sqlite
+*.db
+chroma_db/
+traces/
+sorties/
+
+# Éditeurs
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+espace_de_travail/
+
+# Livre généré (PDF, EPUB, fichiers intermédiaires Typst)
+livre/sortie/
+
+# Gabarit Word régénérable : voir livre/gabarits/reference_kdp.py
+livre/gabarits/reference-kdp.docx
+
+# Bases de reprise produites par le chapitre 12
+*.sqlite
+outbox/
+
+
+# Ce que myTravel écrit en tournant : profils, conversations, traces
+var/
+
+# Journaux SQLite
+*.db-shm
+*.db-wal

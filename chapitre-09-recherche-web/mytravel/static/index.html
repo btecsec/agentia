@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>myTravel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.12/marked.min.js"
+  integrity="sha384-948ahk4ZmxYVYOc+rxN1H2gM1EJ2Duhp7uHtZ4WSLkV4Vtx5MUqnV+l7u9B+jFv+"
+  crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.6/purify.min.js"
+  integrity="sha384-JEyTNhjM6R1ElGoJns4U2Ln4ofPcqzSsynQkmEc/KGy6336qAZl70tDLufbkla+3"
+  crossorigin="anonymous"></script>
+<style>
+  /* Colours live here, once. Dark mode only redefines them. */
+  :root {
+    --sky: #0ea5e9; --sunset: #f97316; --rose: #ec4899;
+    --bg: #fff7ed; --card: #ffffff; --text: #1e293b;
+    --muted: #64748b; --line: #fde2c8; --me: #0ea5e9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a; --card: #1e293b; --text: #f1f5f9;
+      --muted: #94a3b8; --line: #334155; --me: #0369a1;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Outfit", system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; flex-direction: column; height: 100vh;
+  }
+  header {
+    background: linear-gradient(120deg, var(--sky), var(--rose),
+                                var(--sunset));
+    color: white; padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  header h1 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+  header p { margin: 0; opacity: .9; font-size: .95rem; }
+  header button { margin-left: auto; }
+  main {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: flex; flex-direction: column; gap: 14px;
+    max-width: 860px; width: 100%; margin: 0 auto;
+  }
+  .bubble {
+    padding: 12px 16px; border-radius: 18px; max-width: 85%;
+    line-height: 1.5; overflow-wrap: anywhere;
+  }
+  .me { align-self: flex-end; background: var(--me); color: white;
+        border-bottom-right-radius: 4px; }
+  .bot { align-self: flex-start; background: var(--card);
+         border: 1px solid var(--line);
+         border-bottom-left-radius: 4px; }
+  .bot a { color: var(--rose); }
+  .bot table { border-collapse: collapse; }
+  .bot td, .bot th { border: 1px solid var(--line); padding: 4px 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+           align-items: center; font-size: .8rem; }
+  .chip {
+    font-size: .8rem; padding: 3px 10px; border-radius: 999px;
+    background: var(--bg); border: 1px solid var(--line);
+    color: var(--muted); text-decoration: none;
+  }
+  .step { background: #e0f2fe; color: #0369a1; border: none; }
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; }
+  .examples button {
+    background: var(--card); color: var(--text);
+    border: 1px solid var(--line); font-weight: 400;
+  }
+  .thinking { color: var(--muted); font-style: italic; }
+  .thinking::after { content: "…"; animation: dots 1s infinite; }
+  @keyframes dots { 50% { opacity: 0; } }
+  form {
+    display: flex; gap: 8px; padding: 14px 20px;
+    max-width: 860px; width: 100%; margin: 0 auto;
+  }
+  input, textarea {
+    font: inherit; padding: 12px 16px; border-radius: 14px;
+    border: 1px solid var(--line); background: var(--card);
+    color: var(--text);
+  }
+  form textarea { flex: 1; resize: none; height: 52px; }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    padding: 10px 18px; border-radius: 14px; border: none;
+    background: linear-gradient(120deg, var(--rose), var(--sunset));
+    color: white;
+  }
+  button:disabled { opacity: .5; cursor: wait; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>✈️ myTravel</h1>
+    <p>Je cherche et je compare. Toi, tu réserves.</p>
+  </div>
+</header>
+
+<main id="chat">
+  <div class="bubble bot">
+    Bonjour ! Dis-moi où tu veux aller. Je vérifie les visas sur
+    les sites officiels, la météo, les risques, et je compare
+    vols et hôtels.
+    <div class="examples">
+      <button>Visa pour le Japon en mars, passeport français ?</button>
+      <button>Quel temps à Lisbonne la semaine prochaine ?</button>
+      <button>Plan complet : Rome, 4 jours en mai, 800 €</button>
+    </div>
+  </div>
+</main>
+
+<form id="ask">
+  <textarea id="message" placeholder="Ta question…"
+            maxlength="2000"></textarea>
+  <button id="send">Envoyer</button>
+</form>
+
+<script>
+// One id per browser: the server finds the conversation with it.
+let conversation = localStorage.getItem("conversation");
+if (!conversation) {
+  conversation = crypto.randomUUID();
+  localStorage.setItem("conversation", conversation);
+}
+const chat = document.getElementById("chat");
+const box = document.getElementById("message");
+const send = document.getElementById("send");
+let busy = false;  // one question at a time
+
+// Add a bubble. Model text is Markdown: render it, then clean it,
+// because a web page could have slipped HTML into the answer.
+function bubble(who, text) {
+  const div = document.createElement("div");
+  div.className = "bubble " + who;
+  if (who === "bot") {
+    div.innerHTML = DOMPurify.sanitize(marked.parse(text));
+    // A new tab per link: the conversation stays on screen.
+    for (const link of div.querySelectorAll("a")) {
+      link.target = "_blank";
+    }
+  } else {
+    div.textContent = text;
+  }
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+// A row of little pills under a bubble.
+function pills(div) {
+  const row = document.createElement("div");
+  row.className = "chips";
+  div.appendChild(row);
+  return row;
+}
+
+// The server answered: show the text.
+function show(reply) {
+  bubble("bot", reply.answer);
+}
+
+// The server sends "data: {...}" blocks, a blank line after
+// each, as they come: read them one by one, as they arrive.
+async function* events(response) {
+  const reader = response.body
+    .pipeThrough(new TextDecoderStream()).getReader();
+  let buffer = "";
+  for (;;) {
+    const {value, done} = await reader.read();
+    if (done) return;
+    buffer += value;
+    const blocks = buffer.split("\n\n");
+    buffer = blocks.pop();  // the last one may be cut in half
+    for (const block of blocks) {
+      yield JSON.parse(block.slice("data: ".length));
+    }
+  }
+}
+
+async function call(url, body) {
+  busy = true;
+  send.disabled = true;
+  const wait = bubble("bot thinking", "Les agents travaillent");
+  const started = pills(wait);  // each step, when it starts
+  let draft = null;  // the answer, word by word
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({conversation, ...body}),
+    });
+    if (!response.ok) {  // refused before the stream started
+      const reply = await response.json().catch(() => ({}));
+      throw new Error(reply.detail);
+    }
+    for await (const event of events(response)) {
+      if (event.type === "step") {
+        const pill = document.createElement("span");
+        pill.className = "chip step";
+        pill.textContent = event.text;
+        started.appendChild(pill);
+      } else if (event.type === "token") {
+        draft ??= bubble("bot", "");
+        // Plain text while it comes: Markdown once it is done.
+        draft.textContent += event.text;
+        chat.scrollTop = chat.scrollHeight;
+      } else if (event.type === "error") {
+        throw new Error(event.detail);
+      } else if (event.type === "done") {
+        show(event);  // the whole answer replaces the draft
+      }
+    }
+  } catch (error) {
+    const text = error.message || "Serveur injoignable.";
+    bubble("bot", "⚠️ " + text);
+  } finally {
+    wait.remove();
+    draft?.remove();
+    send.disabled = false;
+    busy = false;
+  }
+}
+
+function ask(text) {
+  if (!text.trim() || busy) return;
+  bubble("me", text);
+  call("/api/chat", {message: text});
+}
+
+document.getElementById("ask").onsubmit = (event) => {
+  event.preventDefault();
+  ask(box.value);
+  box.value = "";
+};
+// Enter sends, Shift+Enter goes to the next line.
+box.onkeydown = (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    document.getElementById("ask").requestSubmit();
+  }
+};
+for (const example of document.querySelectorAll(".examples button")) {
+  example.onclick = () => ask(example.textContent);
+}
+</script>
+</body>
+</html>

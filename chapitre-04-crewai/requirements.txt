@@ -1,0 +1,10 @@
+# Dépendances du chapitre 4 seulement. Depuis ce dossier :
+#     py -3.13 -m venv .venv-crewai
+#     .venv-crewai\Scripts\activate
+#     pip install -r requirements.txt
+# Le SDK `openai` sert à parler à OpenRouter, pas à OpenAI (voir modele.py).
+openai>=1.60
+python-dotenv>=1.0
+pytest>=8.0
+# CrewAI ne supporte pas encore Python 3.14 : utilise Python 3.13 ou plus ancien.
+crewai>=1.15

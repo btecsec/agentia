@@ -1,0 +1,16 @@
+# Self-hosted n8n for chapter 5.
+#   docker compose up -d      then open http://localhost:5678
+#   docker compose down       to stop (your workflows stay in the volume)
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Europe/Paris
+      - TZ=Europe/Paris
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

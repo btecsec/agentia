@@ -1,0 +1,35 @@
+# Dépendances de tout le livre, installées une seule fois à la racine :
+#     python -m venv .venv && .venv\Scripts\activate
+#     pip install -r requirements.txt
+# Le SDK `openai` sert à parler à OpenRouter, pas à OpenAI : même dialecte,
+# seule l'URL de base change (voir modele.py).
+openai>=1.60
+python-dotenv>=1.0
+pytest>=8.0
+pytest-asyncio>=0.24
+# Windows n'a pas de base de fuseaux horaires : `zoneinfo` la lit dans ce paquet.
+tzdata>=2024.1
+pydantic>=2.7
+PyYAML>=6.0
+httpx>=0.27
+anyio>=4.0
+numpy>=1.26
+scikit-learn>=1.4
+# myTravel (ch. 10) : recherche web. Tavily si TAVILY_API_KEY est
+# renseignée, sinon DuckDuckGo (sans clé), certificats du système.
+tavily-python>=0.8
+ddgs>=9.0
+truststore>=0.10
+mcp>=2.0
+langgraph>=1.2
+langgraph-checkpoint-sqlite>=3.1
+openai-agents>=0.22
+claude-agent-sdk>=0.2
+fastapi>=0.115
+starlette>=0.40
+uvicorn>=0.30
+# LangChain (chapitre 4) : l'agent en quinze lignes, branché sur OpenRouter.
+langchain>=1.4
+langchain-openai>=1.6
+# CrewAI (chapitre 4) : ne supporte pas encore Python 3.14, donc ignoré là.
+crewai>=1.15; python_version < "3.14"

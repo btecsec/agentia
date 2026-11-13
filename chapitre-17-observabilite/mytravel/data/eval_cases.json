@@ -1,0 +1,38 @@
+[
+  {
+    "question": "Je suis français. Ai-je besoin d'un visa pour aller au Japon 10 jours en mars ?",
+    "agents": ["Administration"],
+    "must_cite": ["gouv.fr"],
+    "must_say": ["passeport"]
+  },
+  {
+    "question": "Quel temps fera-t-il à Lisbonne la semaine prochaine ?",
+    "agents": ["Météo"],
+    "must_cite": ["open-meteo.com"],
+    "must_say": ["°C"]
+  },
+  {
+    "question": "Est-ce que le Pérou est sûr pour un voyageur seul ?",
+    "agents": ["Risque"],
+    "must_cite": ["diplomatie.gouv.fr"],
+    "must_say": []
+  },
+  {
+    "question": "Trouve-moi un hôtel calme à Porto du 2027-05-02 au 2027-05-06 pour 2 personnes.",
+    "agents": ["Hôtel"],
+    "must_cite": ["booking.com"],
+    "must_say": ["Porto"]
+  },
+  {
+    "question": "Un vol Paris-Montréal du 2027-07-01 au 2027-07-15, c'est combien ?",
+    "agents": ["Transports"],
+    "must_cite": ["google.com"],
+    "must_say": ["Montréal"]
+  },
+  {
+    "question": "Puis-je prendre un liquide de 200 ml en cabine ?",
+    "agents": ["Administration"],
+    "must_cite": [],
+    "must_say": ["100 ml"]
+  }
+]
